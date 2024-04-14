@@ -17,7 +17,7 @@ rollup简介
 
 my-rollup-demos：我的第一个rollup项目
 
-my-rollup-utils：使用官方脚手架新建的rollup项目
+rollup-starter-lib：rollup官方的项目
 
 my-rollup-vue3-components：使用rollup新建vue3组件库
 
