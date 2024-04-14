@@ -1,0 +1,23 @@
+{
+  "name": "my-rollup-demos",
+  "version": "1.0.0",
+  "description": "Rollup Demo",
+  "main": "index.js",
+  "dependencies": {
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-strip": "^3.0.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup": "^4.14.2",
+    "tslib": "^2.6.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
