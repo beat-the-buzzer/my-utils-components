@@ -2906,4 +2906,242 @@ function encryptByMd5(password) {
     return md5(password).toString();
 }
 
-export { AesEncryption, decodeByBase64, encryptByBase64, encryptByMd5 };
+/**
+ * 判断是否 十六进制颜色值.
+ * 输入形式可为 #fff000 #f00
+ *
+ * @param   String  color   十六进制颜色值
+ * @return  Boolean
+ */
+function isHexColor(color) {
+    const reg = /^#([0-9a-fA-F]{3}|[0-9a-fA-f]{6})$/;
+    return reg.test(color);
+}
+/**
+ * RGB 颜色值转换为 十六进制颜色值.
+ * r, g, 和 b 需要在 [0, 255] 范围内
+ *
+ * @return  String          类似#ff00ff
+ * @param r
+ * @param g
+ * @param b
+ */
+function rgbToHex(r, g, b) {
+    // tslint:disable-next-line:no-bitwise
+    const hex = ((r << 16) | (g << 8) | b).toString(16);
+    return '#' + new Array(Math.abs(hex.length - 7)).join('0') + hex;
+}
+/**
+ * Transform a HEX color to its RGB representation
+ * @param {string} hex The color to transform
+ * @returns The RGB representation of the passed color
+ */
+function hexToRGB(hex) {
+    let sHex = hex.toLowerCase();
+    if (isHexColor(hex)) {
+        if (sHex.length === 4) {
+            let sColorNew = '#';
+            for (let i = 1; i < 4; i += 1) {
+                sColorNew += sHex.slice(i, i + 1).concat(sHex.slice(i, i + 1));
+            }
+            sHex = sColorNew;
+        }
+        const sColorChange = [];
+        for (let i = 1; i < 7; i += 2) {
+            sColorChange.push(parseInt('0x' + sHex.slice(i, i + 2)));
+        }
+        return 'RGB(' + sColorChange.join(',') + ')';
+    }
+    return sHex;
+}
+function colorIsDark(color) {
+    if (!isHexColor(color))
+        return;
+    const [r, g, b] = hexToRGB(color)
+        .replace(/(?:\(|\)|rgb|RGB)*/g, '')
+        .split(',')
+        .map((item) => Number(item));
+    return r * 0.299 + g * 0.578 + b * 0.114 < 192;
+}
+/**
+ * Darkens a HEX color given the passed percentage
+ * @param {string} color The color to process
+ * @param {number} amount The amount to change the color by
+ * @returns {string} The HEX representation of the processed color
+ */
+function darken(color, amount) {
+    color = color.indexOf('#') >= 0 ? color.substring(1, color.length) : color;
+    amount = Math.trunc((255 * amount) / 100);
+    return `#${subtractLight(color.substring(0, 2), amount)}${subtractLight(color.substring(2, 4), amount)}${subtractLight(color.substring(4, 6), amount)}`;
+}
+/**
+ * Lightens a 6 char HEX color according to the passed percentage
+ * @param {string} color The color to change
+ * @param {number} amount The amount to change the color by
+ * @returns {string} The processed color represented as HEX
+ */
+function lighten(color, amount) {
+    color = color.indexOf('#') >= 0 ? color.substring(1, color.length) : color;
+    amount = Math.trunc((255 * amount) / 100);
+    return `#${addLight(color.substring(0, 2), amount)}${addLight(color.substring(2, 4), amount)}${addLight(color.substring(4, 6), amount)}`;
+}
+/* Suma el porcentaje indicado a un color (RR, GG o BB) hexadecimal para aclararlo */
+/**
+ * Sums the passed percentage to the R, G or B of a HEX color
+ * @param {string} color The color to change
+ * @param {number} amount The amount to change the color by
+ * @returns {string} The processed part of the color
+ */
+function addLight(color, amount) {
+    const cc = parseInt(color, 16) + amount;
+    const c = cc > 255 ? 255 : cc;
+    return c.toString(16).length > 1 ? c.toString(16) : `0${c.toString(16)}`;
+}
+/**
+ * Calculates luminance of an rgb color
+ * @param {number} r red
+ * @param {number} g green
+ * @param {number} b blue
+ */
+function luminanace(r, g, b) {
+    const a = [r, g, b].map((v) => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+/**
+ * Calculates contrast between two rgb colors
+ * @param {string} rgb1 rgb color 1
+ * @param {string} rgb2 rgb color 2
+ */
+function contrast(rgb1, rgb2) {
+    return ((luminanace(~~rgb1[0], ~~rgb1[1], ~~rgb1[2]) + 0.05) /
+        (luminanace(rgb2[0], rgb2[1], rgb2[2]) + 0.05));
+}
+/**
+ * Determines what the best text color is (black or white) based con the contrast with the background
+ * @param hexColor - Last selected color by the user
+ */
+function calculateBestTextColor(hexColor) {
+    const rgbColor = hexToRGB(hexColor.substring(1));
+    const contrastWithBlack = contrast(rgbColor.split(','), [0, 0, 0]);
+    return contrastWithBlack >= 12 ? '#000000' : '#FFFFFF';
+}
+/**
+ * Subtracts the indicated percentage to the R, G or B of a HEX color
+ * @param {string} color The color to change
+ * @param {number} amount The amount to change the color by
+ * @returns {string} The processed part of the color
+ */
+function subtractLight(color, amount) {
+    const cc = parseInt(color, 16) - amount;
+    const c = cc < 0 ? 0 : cc;
+    return c.toString(16).length > 1 ? c.toString(16) : `0${c.toString(16)}`;
+}
+
+const toString = Object.prototype.toString;
+function is(val, type) {
+    return toString.call(val) === `[object ${type}]`;
+}
+function isDef(val) {
+    return typeof val !== 'undefined';
+}
+function isUnDef(val) {
+    return !isDef(val);
+}
+function isObject(val) {
+    return val !== null && is(val, 'Object');
+}
+function isEmpty(val) {
+    if (isArray(val) || isString(val)) {
+        return val.length === 0;
+    }
+    if (val instanceof Map || val instanceof Set) {
+        return val.size === 0;
+    }
+    if (isObject(val)) {
+        return Object.keys(val).length === 0;
+    }
+    return false;
+}
+function isDate(val) {
+    return is(val, 'Date');
+}
+function isNull(val) {
+    return val === null;
+}
+function isNullAndUnDef(val) {
+    return isUnDef(val) && isNull(val);
+}
+function isNullOrUnDef(val) {
+    return isUnDef(val) || isNull(val);
+}
+function isNumber(val) {
+    return is(val, 'Number');
+}
+function isPromise(val) {
+    return is(val, 'Promise') && isObject(val) && isFunction(val.then) && isFunction(val.catch);
+}
+function isString(val) {
+    return is(val, 'String');
+}
+function isFunction(val) {
+    return typeof val === 'function';
+}
+function isBoolean(val) {
+    return is(val, 'Boolean');
+}
+function isRegExp(val) {
+    return is(val, 'RegExp');
+}
+function isArray(val) {
+    return val && Array.isArray(val);
+}
+function isWindow(val) {
+    return typeof window !== 'undefined' && is(val, 'Window');
+}
+function isElement(val) {
+    return isObject(val) && !!val.tagName;
+}
+function isMap(val) {
+    return is(val, 'Map');
+}
+const isServer = typeof window === 'undefined';
+const isClient = !isServer;
+function isUrl(path) {
+    const reg = /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
+    return reg.test(path);
+}
+
+const hexList = [];
+for (let i = 0; i <= 15; i++) {
+    hexList[i] = i.toString(16);
+}
+function buildUUID() {
+    let uuid = '';
+    for (let i = 1; i <= 36; i++) {
+        if (i === 9 || i === 14 || i === 19 || i === 24) {
+            uuid += '-';
+        }
+        else if (i === 15) {
+            uuid += 4;
+        }
+        else if (i === 20) {
+            uuid += hexList[(Math.random() * 4) | 8];
+        }
+        else {
+            uuid += hexList[(Math.random() * 16) | 0];
+        }
+    }
+    return uuid.replace(/-/g, '');
+}
+let unique = 0;
+function buildShortUUID(prefix = '') {
+    const time = Date.now();
+    const random = Math.floor(Math.random() * 1000000000);
+    unique++;
+    return prefix + '_' + random + unique + String(time);
+}
+
+export { AesEncryption, buildShortUUID, buildUUID, calculateBestTextColor, colorIsDark, darken, decodeByBase64, encryptByBase64, encryptByMd5, hexToRGB, is, isArray, isBoolean, isClient, isDate, isDef, isElement, isEmpty, isFunction, isHexColor, isMap, isNull, isNullAndUnDef, isNullOrUnDef, isNumber, isObject, isPromise, isRegExp, isServer, isString, isUnDef, isUrl, isWindow, lighten, rgbToHex };
