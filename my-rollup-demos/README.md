@@ -1,5 +1,7 @@
 # 构建自己的前端方法库——rollup
 
+Rollup 是一个用于 JavaScript 的模块打包工具，它将小的代码片段编译成更大、更复杂的代码，例如库或应用程序。它使用 JavaScript 的 ES6 版本中包含的新标准化代码模块格式，而不是以前的 CommonJS 和 AMD 等特殊解决方案。ES 模块允许你自由无缝地组合你最喜欢的库中最有用的个别函数。这在未来将在所有场景原生支持，但 Rollup 让你今天就可以开始这样做。
+
 ## 使用 rollup 打包第一个模块
 
 ### 打包成三种不同的代码格式
@@ -71,7 +73,7 @@ pnpm install @rollup/plugin-commonjs -D
 pnpm install @rollup/plugin-typescript -D
 ```
 
-## 去除调试代码 例如 console debugger
+### 去除调试代码 例如 console debugger
 
 ```shell
 pnpm install @rollup/plugin-strip -D
