@@ -19,6 +19,4 @@ my-rollup-demos：我的第一个rollup项目
 
 rollup-starter-lib：rollup官方的项目
 
-my-rollup-vue3-components：使用rollup新建vue3组件库
-
-my-rollup-vue2-components：使用rollup新建vue2组件库
+vitepress-doc：文档站点
